@@ -13,7 +13,7 @@
 var PiCl = {
 
   _serverHost: null,
-  _keyServerHost: null,
+  _keyServerHost: 'http://127.0.0.1:8090',
   _syncFlag: null, // if sync_flag is set then sync service is active
 
   init: function picl_init(options) {
@@ -45,7 +45,25 @@ var PiCl = {
   createUser: function picl_createUser(args) {
     args = args || {};
     if (!args.email) {
-      handleError('No email in argument to createUser' + args);
+      PiCl.handleError('No email in argument to createUser: ' + args);
+    }
+    else {
+      args = JSON.stringify(args);
+      console.log(args);
+      var xhr = new XMLHttpRequest({
+        mozSystem: true
+      });
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log(xhr.response);
+        }
+      };
+      xhr.onerror = function() {
+        PiCl.handleError('xhr POST error, status: ' + xhr.status);
+      };
+      xhr.open('POST', PiCl._keyServerHost + '/user', true);
+      xhr.setRequestHeader('Content-type', 'application/json');
+      xhr.send(args);
     }
   },
 
@@ -55,5 +73,49 @@ var PiCl = {
   */
   getUser: function picl_getUser(args) {
     args = args || {};
+    if (!args.email) {
+      PiCl.handleError('No email in argument to picl_getUser ' + args);
+    }
+
+    //XXX Needs Fix: response code returning 2 times from key-server.
+    else {
+      var xhr = new XMLHttpRequest({
+        mozSystem: true
+      });
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          //Success i.e. user exists
+          console.log(xhr.response);
+        }
+        if (xhr.status === 404) {
+          // User does not exist
+          console.log(xhr.response);
+        }
+      };
+      xhr.onerror = function() {
+        PiCl.handleError('xhr.response, onerror: ' + xhr.response);
+      };
+      xhr.open('GET', PiCl._keyServerHost + '/user/?email=' + args.email, true);
+      xhr.send();
+    }
   }
 };
+
+
+//XXX Remove these buttons when done testing.
+var getUser_button = document.getElementById('mock-picl-getUser');
+getUser_button.addEventListener('click', function() {
+
+  PiCl.getUser({'email': 'ktyaks@gmail.com'});
+  console.log('getUser button clicked.');
+
+});
+
+var createUser_button = document.getElementById('mock-picl-createUser');
+createUser_button.addEventListener('click', function() {
+
+  console.log('createUser button clicked.');
+  PiCl.createUser({'email': 'ktyaks@gmail.com'});
+
+});
+///
