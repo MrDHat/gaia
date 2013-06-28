@@ -4,6 +4,10 @@
 'use strict';
 
 
+/* StorageProtocolZero contacts data format:
+* https://gist.github.com/MrDHat/5502008
+*/
+
 /*
 * Abstract class for basic PiCl functions
 *   -Checks if sync is turned on
@@ -15,6 +19,7 @@ var PiCl = {
   _serverHost: null,
   _keyServerHost: 'http://127.0.0.1:8090',
   _syncFlag: null, // if sync_flag is set then sync service is active
+  _personaID: null,
 
   init: function picl_init(options) {
     options = options || {};
@@ -26,16 +31,15 @@ var PiCl = {
 
   // Gets logged in Persona ID
   getID: function get_personaID() {
-
+    return PiCl._personaID;
   },
 
-  enableSync: function picl_enableSync(args) {
-    args = args || {};
-
+  enableSync: function picl_enableSync() {
+    PiCl._syncFlag = 1;
   },
 
   disableSync: function picl_disableSync() {
-
+    PiCl._syncFlag = 0;
   },
 
   /* POST /user
@@ -77,7 +81,7 @@ var PiCl = {
       PiCl.handleError('No email in argument to picl_getUser ' + args);
     }
 
-    //XXX Needs Fix: response code returning 2 times from key-server.
+    //XXX Needs Fix: response code returning 2 times from key-server when 404.
     else {
       var xhr = new XMLHttpRequest({
         mozSystem: true

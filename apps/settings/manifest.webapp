@@ -29,7 +29,11 @@
     "idle":{},
     "telephony":{},
     "audio-channel-notification":{},
-    "systemXHR": {}
+    "systemXHR": {},
+    "contacts": {
+      "description": "To enable syncing of contacts by PiCl (js/PiCl/)",
+      "access": "readwrite"
+    }
   },
   "activities": {
     "configure": {
