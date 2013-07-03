@@ -28,18 +28,25 @@ var ContactsWrapper = {
   readContacts: function picl_contactsReader(args) {
     args = args || {};
     var contacts_filter = {sortBy: 'familyName', sortOrder: 'descending'};
+    var storage_identifier = 'picl.contacts';
     if (args.classifier === 'all') {
       //Get all contacts
       console.log('Reading all contacts');
       var contacts = navigator.mozContacts.getAll(contacts_filter);
       contacts.onsuccess = function(event) {
-        console.log('Success reading contacts');
-        console.log(JSON.stringify(event.target.result));
-        //var cursor = event.target;
-        /*if(cursor.result) {
-          console.log("Found: " + JSON.stringify(cursor.result));
+        var cursor = event.target;
+        if (cursor.result) {
+          console.log('Found: ' + JSON.stringify(cursor.result));
+          console.log(cursor.result.id);
+          storage_identifier = storage_identifier + '.' + cursor.result.id;
+          console.log(storage_identifier);
+          //shared/async_storage.js
+          var storage_value = JSON.stringify(cursor.result);
+          asyncStorage.setItem(storage_identifier, storage_value, function() {
+            console.log('Stored: ' + storage_identifier);
+          });
           cursor.continue();
-        }*/
+        }
       };
       contacts.onerror = function() {
         ContactsWrapper.handleError('Error reading contacts');
