@@ -3,7 +3,10 @@
 
 'use strict';
 
-(function() {
+LazyLoader.load(['js/picl/lib/hawk.js', 'js/picl/idp.js', 'js/picl/sync.js'],
+    startSync);
+
+function startSync () {
 
     //Seed the generator
     navigator.jwcrypto.addEntropy(crypto.getRandomValues(new Uint8Array(32)));
@@ -12,7 +15,8 @@
     const audience = 'http://auth.oldsync.dev.lcip.org';
     const email = 'gaia@mockmyid.com';
 
-    const mockIdp = new Idp();
+    var mockIdp = new Idp();
+    var syncClient = new SyncClient({ url: audience });
 
     mockIdp.getAssertion({
       email: email,
@@ -21,5 +25,8 @@
       assertionDuration: duration
     }, function(assertion) {
         console.log(assertion);
+        syncClient.auth(assertion, function(response) {
+            console.log(JSON.stringify(response));
+        })
     });
-})();
+}

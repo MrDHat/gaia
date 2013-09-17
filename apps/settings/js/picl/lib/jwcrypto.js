@@ -26,35 +26,35 @@ require._core = {
 require.resolve = (function () {
     return function (x, cwd) {
         if (!cwd) cwd = '/';
-        
+
         if (require._core[x]) return x;
         var path = require.modules.path();
         cwd = path.resolve('/', cwd);
         var y = cwd || '/';
-        
+
         if (x.match(/^(?:\.\.?\/|\/)/)) {
             var m = loadAsFileSync(path.resolve(y, x))
                 || loadAsDirectorySync(path.resolve(y, x));
             if (m) return m;
         }
-        
+
         var n = loadNodeModulesSync(x, y);
         if (n) return n;
-        
+
         throw new Error("Cannot find module '" + x + "'");
-        
+
         function loadAsFileSync (x) {
             x = path.normalize(x);
             if (require.modules[x]) {
                 return x;
             }
-            
+
             for (var i = 0; i < require.extensions.length; i++) {
                 var ext = require.extensions[i];
                 if (require.modules[x + ext]) return x + ext;
             }
         }
-        
+
         function loadAsDirectorySync (x) {
             x = x.replace(/\/+$/, '');
             var pkgfile = path.normalize(x + '/package.json');
@@ -74,10 +74,10 @@ require.resolve = (function () {
                     if (m) return m;
                 }
             }
-            
+
             return loadAsFileSync(x + '/index');
         }
-        
+
         function loadNodeModulesSync (x, start) {
             var dirs = nodeModulesPathsSync(start);
             for (var i = 0; i < dirs.length; i++) {
@@ -87,23 +87,23 @@ require.resolve = (function () {
                 var n = loadAsDirectorySync(dir + '/' + x);
                 if (n) return n;
             }
-            
+
             var m = loadAsFileSync(x);
             if (m) return m;
         }
-        
+
         function nodeModulesPathsSync (start) {
             var parts;
             if (start === '/') parts = [ '' ];
             else parts = path.normalize(start).split('/');
-            
+
             var dirs = [];
             for (var i = parts.length - 1; i >= 0; i--) {
                 if (parts[i] === 'node_modules') continue;
                 var dir = parts.slice(0, i + 1).join('/') + '/node_modules';
                 dirs.push(dir);
             }
-            
+
             return dirs;
         }
     };
@@ -119,13 +119,13 @@ require.alias = function (from, to) {
         res = require.resolve(from, '/');
     }
     var basedir = path.dirname(res);
-    
+
     var keys = (Object.keys || function (obj) {
         var res = [];
         for (var key in obj) res.push(key);
         return res;
     })(require.modules);
-    
+
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
         if (key.slice(0, basedir.length + 1) === basedir + '/') {
@@ -140,17 +140,17 @@ require.alias = function (from, to) {
 
 (function () {
     var process = {};
-    
+
     require.define = function (filename, fn) {
         if (require.modules.__browserify_process) {
             process = require.modules.__browserify_process();
         }
-        
+
         var dirname = require._core[filename]
             ? ''
             : require.modules.path().dirname(filename)
         ;
-        
+
         var require_ = function (file) {
             return require(file, dirname);
         };
@@ -161,7 +161,7 @@ require.alias = function (from, to) {
         require_.define = require.define;
         require_.cache = require.cache;
         var module_ = { exports : {} };
-        
+
         require.modules[filename] = function () {
             require.cache[filename] = module_;
             fn.call(
@@ -269,7 +269,7 @@ path = normalizeArray(filter(path.split('/'), function(p) {
   if (path && trailingSlash) {
     path += '/';
   }
-  
+
   return (isAbsolute ? '/' : '') + path;
 };
 
@@ -322,7 +322,7 @@ process.nextTick = (function () {
     var canPost = typeof window !== 'undefined'
         && window.postMessage && window.addEventListener
     ;
-    
+
     if (canPost) {
         window.addEventListener('message', function (ev) {
             if (ev.source === window && ev.data === 'browserify-tick') {
@@ -334,7 +334,7 @@ process.nextTick = (function () {
             }
         }, true);
     }
-    
+
     return function (fn) {
         if (canPost) {
             queue.push(fn);
@@ -734,7 +734,7 @@ function hex2b64urlencode(arg) {
   // proper number of octets.
   if ((arg.length % 2) != 0)
     arg = "0" + arg;
-  
+
   return libs.hex2b64(arg).split('=')[0]
     .replace(/\+/g, '-')  // 62nd char of encoding
     .replace(/\//g, '_'); // 63rd char of encoding
@@ -1279,7 +1279,7 @@ function hex2b64(h) {
   // fix by bwarner
   if (h.length % 2 == 1)
     h = "0"+h;
-  
+
   for(i = 0; i+3 <= h.length; i+=3) {
     c = parseInt(h.substring(i,i+3),16);
     ret += b64map.charAt(c >> 6) + b64map.charAt(c & 63);
@@ -2743,7 +2743,7 @@ function BrowserRNG() {
     // throw an exception on some platforms, so we have to be
     // ultra stoopid about how we do this
   }
-  
+
   this.isSeeded = has_getrandomvalues;
 }
 
@@ -2759,7 +2759,7 @@ BrowserRNG.prototype = {
     // so we need to check that maybe a previous object properly seeded
     // the RNG or we will never get the seed event.
     this.isSeeded = this.isSeeded || sjcl.random.isReady();
-    
+
     if (this.isSeeded) {
       if (cb) delay(cb)();
       return;
@@ -2771,7 +2771,7 @@ BrowserRNG.prototype = {
           cb();
       });
 
-      // tell sjcl to start collecting some entropy      
+      // tell sjcl to start collecting some entropy
       sjcl.random.startCollectors();
     }
   },
@@ -3528,6 +3528,8 @@ var jwcrypto = require("./lib/jwcrypto");
 require("./lib/algs/ds");
 
 navigator.jwcrypto = jwcrypto;
-
+if (navigator.jwcrypto === jwcrypto) {
+  document.dispatchEvent(new Event('jwcryptoReady'));
+}
 });
 require("/bundle.js");
