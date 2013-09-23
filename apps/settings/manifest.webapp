@@ -29,7 +29,11 @@
     "power":{},
     "idle":{},
     "telephony":{},
-    "audio-channel-notification":{}
+    "audio-channel-notification":{},
+    "contacts": {
+      "description": "To enable syncing of contacts by PiCl",
+      "access": "readwrite"
+    }
   },
   "activities": {
     "configure": {

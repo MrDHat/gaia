@@ -25,9 +25,10 @@ SyncClient.prototype.auth = function(assertion, callback) {
         console.error(xhr.readyState);
         callback({ error: xhr.status });
     };
+    console.log(URLIdentifier);
     xhr.open('GET', URLIdentifier, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'BrowserID' + assertion);
+    xhr.setRequestHeader('Authorization', 'BrowserID ' + assertion);
     xhr.send();
 };
 
@@ -48,6 +49,7 @@ SyncClient.prototype.request = function(path, options, callback) {
         algorithm: 'sha256'
     };
     var uri = this.token.api_endpoint + options.path;
+    console.log(uri);
     var header = Hawk.client.header(options.uri, 'GET', {credentials: credentials});
 
     var xhr = new XMLHttpRequest({
